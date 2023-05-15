@@ -47,7 +47,5 @@ export default class User extends BaseModel {
     }
   }
 
-  public async softDelete(column?: string) {
-    await softDelete(this, column);
-  }
+
 }

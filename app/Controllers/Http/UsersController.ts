@@ -116,7 +116,7 @@ export default class UsersController {
   async destroy({ params, response }) {
     try {
       const user = await User.findOrFail(params.id);
-      await user.softDelete();
+      await user.delete();
       return response.status(204).json(null);
     } catch (error) {
       return response.status(500).json({

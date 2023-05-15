@@ -18,13 +18,15 @@
 |
 */
 
-import Route from '@ioc:Adonis/Core/Route'
+import Route from "@ioc:Adonis/Core/Route";
 
-Route.get('/', async () => {
-  return { hello: 'world' }
-})
+Route.get("/", async () => {
+  return { hello: "world" };
+});
 
 Route.resource("login", "SessionsController").apiOnly();
+Route.resource("produtos", "ProdutosController").apiOnly();
+Route.resource("categorias", "ProdutoCategoriasController").apiOnly();
 
 Route.resource("users", "UsersController").middleware({
   // store: "auth",
