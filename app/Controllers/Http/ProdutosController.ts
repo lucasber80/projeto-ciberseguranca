@@ -1,4 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Log from "App/Models/Log";
 
 import Produto from "App/Models/Produto";
 
@@ -17,16 +18,21 @@ export default class ProdutosController {
     }
   }
 
-  async store({ request, response }) {
+  async store({ request, response, auth }) {
     let body = request.body();
     try {
       const produto = await Produto.findBy("name", body.name);
       if (produto)
         return response.status(409).json({ error: "produto já existente" });
 
-      const user = await Produto.create(body);
-
-      return response.status(201).json({ user });
+      const newProduto = await Produto.create(body);
+      let log = new Log();
+      log.operation = "create";
+      log.user_name = auth.user.name;
+      log.table = "produtos";
+      log.item_id = newProduto.id;
+      await log.save();
+      return response.status(201).json({ newProduto });
     } catch (error) {
       console.log(error);
       return response
@@ -47,14 +53,21 @@ export default class ProdutosController {
     }
   }
 
-  async update({ params, request, response }) {
+  async update({ params, request, response, auth }) {
     let body = request.body();
     try {
-      const user = await Produto.findOrFail(params.id);
-      user.merge(body);
+      const newProduto = await Produto.findOrFail(params.id);
+      newProduto.merge(body);
 
-      await user.save();
-      return response.status(200).json(user);
+      await newProduto.save();
+
+      let log = new Log();
+      log.operation = "update";
+      log.user_name = auth.user.name;
+      log.table = "produtos";
+      log.item_id = newProduto.id;
+      await log.save();
+      return response.status(200).json(newProduto);
     } catch (error) {
       return response.status(500).json({
         error: "Erro ao atualizar o produto.",
@@ -63,9 +76,15 @@ export default class ProdutosController {
     }
   }
 
-  async destroy({ params, response }) {
+  async destroy({ params, response, auth }) {
     try {
       const produto = await Produto.findOrFail(params.id);
+      let log = new Log();
+      log.operation = "delete";
+      log.user_name = auth.user.name;
+      log.table = "produtos";
+      log.item_id = produto.id;
+      await log.save();
       await produto.delete();
       return response.status(204).json(null);
     } catch (error) {

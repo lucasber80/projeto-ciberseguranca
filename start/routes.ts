@@ -25,11 +25,24 @@ Route.get("/", async () => {
 });
 
 Route.resource("login", "SessionsController").apiOnly();
-Route.resource("produtos", "ProdutosController").apiOnly();
-Route.resource("categorias", "ProdutoCategoriasController").apiOnly();
+Route.resource("produtos", "ProdutosController").apiOnly().middleware({
+  store: "auth",
+  update: "auth",
+  destroy: "auth",
+  index: "auth",
+});
+Route.resource("categorias", "ProdutoCategoriasController")
+  .apiOnly()
+  .middleware({
+    index: "auth",
+    store: "auth",
+    update: "auth",
+    destroy: "auth",
+  });
 
 Route.resource("users", "UsersController").middleware({
-  // store: "auth",
-  // update: "auth",
-  // destroy: "auth",
+  index: "auth",
+  store: "auth",
+  update: "auth",
+  destroy: "auth",
 });

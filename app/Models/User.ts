@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
 import { column, beforeSave, BaseModel, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
-import { softDelete } from 'App/services/softDelete'
 import Role from './Role'
 
 export default class User extends BaseModel {

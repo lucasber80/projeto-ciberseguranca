@@ -1,6 +1,7 @@
 import User from "App/Models/User";
 import { schema, rules } from "@ioc:Adonis/Core/Validator";
 import Env from "@ioc:Adonis/Core/Env";
+import Log from "App/Models/Log";
 export default class UsersController {
   sender = Env.get("EMAIL");
   newUserSchema = schema.create({
@@ -38,8 +39,6 @@ export default class UsersController {
     }
   }
 
- 
-
   gerarSenha(tamanho) {
     const caracteres =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}[]<>?";
@@ -52,7 +51,7 @@ export default class UsersController {
     return senha;
   }
 
-  async store({ request, response }) {
+  async store({ request, response,auth }) {
     try {
       const payload = await request.validate({
         schema: this.newUserSchema,
@@ -62,16 +61,20 @@ export default class UsersController {
         return response.status(409).json({ error: "Email já existente" });
 
       let newUser = {
-        email:payload.email,
-        password:payload.password,
-        name:payload.name,
-        role_id:payload.role_id,
-        ativo:true
-      }
+        email: payload.email,
+        password: payload.password,
+        name: payload.name,
+        role_id: payload.role_id,
+        ativo: true,
+      };
 
       const user = await User.create(newUser);
-
-      
+      let log = new Log();
+      log.operation = "create";
+      log.user_name = auth.user.name;
+      log.table = "users";
+      log.item_id = user.id;
+      await log.save();
 
       return response.status(201).json({ user });
     } catch (error) {
@@ -94,7 +97,7 @@ export default class UsersController {
     }
   }
 
-  async update({ params, request, response }) {
+  async update({ params, request, response,auth }) {
     try {
       const payload = await request.validate({
         schema: this.newUserSchema,
@@ -103,7 +106,13 @@ export default class UsersController {
       const user = await User.findOrFail(params.id);
       user.merge(userData);
 
-      await user.save();
+      let log = new Log();
+      log.operation = "update";
+      log.user_name = auth.user.name;
+      log.table = "users";
+      log.item_id = user.id;
+      await log.save();
+      
       return response.status(200).json(user);
     } catch (error) {
       return response.status(500).json({
@@ -113,9 +122,15 @@ export default class UsersController {
     }
   }
 
-  async destroy({ params, response }) {
+  async destroy({ params, response,auth }) {
     try {
       const user = await User.findOrFail(params.id);
+      let log = new Log();
+      log.operation = "delete";
+      log.user_name = auth.user.name;
+      log.table = "users";
+      log.item_id = user.id;
+      await log.save();
       await user.delete();
       return response.status(204).json(null);
     } catch (error) {
