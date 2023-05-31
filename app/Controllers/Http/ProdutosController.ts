@@ -19,6 +19,7 @@ export default class ProdutosController {
   }
 
   async store({ request, response, auth }) {
+    if(auth.user.role_id == 3) return response.status(401)
     let body = request.body();
     try {
       const produto = await Produto.findBy("name", body.name);
@@ -54,6 +55,7 @@ export default class ProdutosController {
   }
 
   async update({ params, request, response, auth }) {
+    if(auth.user.role_id == 3) return response.status(401)
     let body = request.body();
     try {
       const newProduto = await Produto.findOrFail(params.id);
@@ -77,6 +79,7 @@ export default class ProdutosController {
   }
 
   async destroy({ params, response, auth }) {
+    if(auth.user.role_id == 3) return response.status(401)
     try {
       const produto = await Produto.findOrFail(params.id);
       let log = new Log();

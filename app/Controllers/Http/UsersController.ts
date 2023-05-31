@@ -52,6 +52,7 @@ export default class UsersController {
   }
 
   async store({ request, response,auth }) {
+    if(auth.user.role_id != 1) return response.status(401)
     try {
       const payload = await request.validate({
         schema: this.newUserSchema,
@@ -99,6 +100,7 @@ export default class UsersController {
 
   async update({ params, request, response,auth }) {
     try {
+      if(auth.user.role_id != 1) return response.status(401)
       const payload = await request.validate({
         schema: this.newUserSchema,
       });
@@ -124,6 +126,7 @@ export default class UsersController {
 
   async destroy({ params, response,auth }) {
     try {
+      if(auth.user.role_id != 1) return response.status(401)
       const user = await User.findOrFail(params.id);
       let log = new Log();
       log.operation = "delete";
